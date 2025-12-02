@@ -1,0 +1,6 @@
+sources:
+  - name: src
+    database: manufacturing_db
+    schema: staging
+    tables:
+      - name: stg_inventory
