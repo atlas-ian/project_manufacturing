@@ -38,5 +38,5 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   manufacturing360:
     # Applies to all files under models/example/
-    example:
+    staging:
       +materialized: table
