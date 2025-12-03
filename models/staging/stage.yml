@@ -1,4 +1,13 @@
 models:
+<<<<<<< HEAD
   - name: stg_inventory
     description: "Table with all inventory information."
     
+=======
+<<<<<<< HEAD
+  - name: stg_inventory
+  - name: stg_products
+=======
+  - name: stg_production_orders
+>>>>>>> c3ff4265321d5e3f5d57c8f3331345b9a1e7796b
+>>>>>>> 79a27dfc5aa1152475e5e2074765739022bd6487
