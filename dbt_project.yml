@@ -6,7 +6,7 @@ name: 'Analytics'
 version: '1.0.0'
 config-version: 2
 
-# This setting configures which "profile" dbt uses for this project.
+# This setting configures which "profile" dbt uses for this project......
 profile: 'project_manufacturing360'
 
 # These configurations specify where dbt should look for different types of files.
