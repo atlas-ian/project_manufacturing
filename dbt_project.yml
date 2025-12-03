@@ -41,7 +41,7 @@ models:
     staging:
       +materialized: view
       +tags: ['staging']
-      +schema: manufacturing360 
+      +schema: staging
     intermediate: 
       +materialized: incremental
       +schema: intermediate    # All intermediate models go into SCHEMA INTERMEDIATE
