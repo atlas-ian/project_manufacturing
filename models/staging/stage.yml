@@ -1,2 +1,8 @@
 models:
   - name: stg_inventory
+    description: "Table with all inventory information."
+    columns:
+      - name: INVENTORY_ID
+        data_tests:
+          - unique
+          - not_null

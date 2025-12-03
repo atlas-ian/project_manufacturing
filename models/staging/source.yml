@@ -4,3 +4,8 @@ sources:
     schema: staging
     tables:
       - name: stg_inventory
+      - name: stg_machine
+      - name: stg_product
+      - name: stg_production_order
+      - name: stg_shipment
+      - name : stg_supplier
