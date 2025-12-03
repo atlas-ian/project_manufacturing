@@ -4,7 +4,7 @@ WITH source_data AS (
         PRODUCT_ID,
         WAREHOUSE_ID,
         ON_HAND_QTY,
-        RESERVED_QTY,
+        
         ON_ORDER_QTY,
         SNAPSHOT_DATE
     FROM {{ source('src', 'raw_inventory') }}
