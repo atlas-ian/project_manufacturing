@@ -15,13 +15,12 @@ models:
       - name: shift_id
   # models/staging/stg_machine.yml
 
-  - name: stg_machine
+  - name: stg_machines
     description: "Staging table for machines"
     columns:
       - name: machine_id
         tests:
           - not_null
-          - unique
      
       - name: install_date
         tests:

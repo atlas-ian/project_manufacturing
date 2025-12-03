@@ -1,3 +1,4 @@
+
 with machines as (
 
     select
@@ -113,3 +114,4 @@ final as (
 )
 
 select * from final
+
