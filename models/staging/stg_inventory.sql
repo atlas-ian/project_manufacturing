@@ -1,1 +1,1 @@
-select * from {{ source ('src', 'stg_inventory')}}
+select * from {{ source ('src', 'raw_inventory')}}

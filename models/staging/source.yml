@@ -3,9 +3,9 @@ sources:
     database: manufacturing_db
     schema: staging
     tables:
-      - name: stg_inventory
-      - name: stg_machine
-      - name: stg_product
-      - name: stg_production_order
-      - name: stg_shipment
-      - name : stg_supplier
+      - name: raw_inventory
+      - name: raw_machine
+      - name: raw_product
+      - name: raw_production_order
+      - name: raw_shipment
+      - name : raw_supplier
