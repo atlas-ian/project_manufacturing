@@ -4,4 +4,12 @@ sources:
     schema: staging
     tables:
       - name: raw_inventory
+<<<<<<< HEAD
       - name: raw_product
+=======
+      - name: raw_machine
+      - name: raw_product
+      - name: raw_production_order
+      - name: raw_shipment
+      - name : raw_supplier
+>>>>>>> c3ff4265321d5e3f5d57c8f3331345b9a1e7796b
