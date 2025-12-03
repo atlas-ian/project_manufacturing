@@ -6,4 +6,5 @@ models:
         data_tests:
           - unique
           - not_null
-      - name:   
+  - name: raw_supplier
+    description: "Table with all supplier information."
