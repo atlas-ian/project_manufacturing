@@ -28,11 +28,11 @@ filtered as (
 
 renamed as (
     select
-        trim(supplier_id)                as supplier_id,
-        initcap(trim(supplier_name))     as supplier_name,
-        initcap(trim(contact_name))      as contact_name,
-        trim(phone)                      as phone,
-        upper(trim(country))             as country,
+        supplier_id,
+        supplier_name,
+        contact_name,
+        phone,
+        country,
         current_timestamp()              as record_loaded_ts
     from filtered
 )

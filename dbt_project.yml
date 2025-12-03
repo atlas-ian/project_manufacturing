@@ -39,7 +39,9 @@ models:
   Analytics:
     # Applies to all files under models/example/
     staging:
-      +materialized: table
+      +materialized: view
+      +tags: ['staging']
+      +schema: manufacturing360 
     intermediate: 
       +materialized: incremental
       +schema: intermediate    # All intermediate models go into SCHEMA INTERMEDIATE
