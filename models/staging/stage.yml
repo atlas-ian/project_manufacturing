@@ -1,7 +1,7 @@
 models:
   - name: stg_inventory
   - name: stg_products
-
+  - name: stg_purchase_orders
   - name: stg_production_orders
     description: "Staging table for production orders"
     columns:
