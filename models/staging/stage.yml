@@ -2,3 +2,19 @@ models:
   - name: stg_inventory
   - name: stg_products
   - name: stg_production_orders
+  # models/staging/stg_machine.yml
+
+  - name: stg_machine
+    description: "Staging table for machines"
+    columns:
+      - name: machine_id
+        tests:
+          - not_null
+          - unique
+     
+      - name: install_date
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
