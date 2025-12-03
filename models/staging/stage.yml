@@ -1,7 +1,18 @@
 models:
   - name: stg_inventory
   - name: stg_products
+
   - name: stg_production_orders
+    description: "Staging table for production orders"
+    columns:
+      - name: production_order_id
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        tests:
+          - not_null
+      - name: shift_id
   # models/staging/stg_machine.yml
 
   - name: stg_machine
