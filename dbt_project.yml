@@ -40,3 +40,8 @@ models:
     # Applies to all files under models/example/
     staging:
       +materialized: table
+    intermediate: 
+      +materialized: incremental
+      +schema: intermediate    # All intermediate models go into SCHEMA INTERMEDIATE
+      +tags: ['intermediate']
+      +on_schema_change: sync_all_columns
