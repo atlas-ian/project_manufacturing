@@ -5,3 +5,9 @@ sources:
     tables:
       - name: raw_inventory
       - name: raw_machine
+
+      - name: raw_product
+      - name: raw_production_order
+      - name: raw_shipment
+      - name : raw_supplier
+
