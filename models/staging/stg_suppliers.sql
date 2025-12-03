@@ -4,7 +4,6 @@
     on_schema_change = 'sync_all_columns'
 ) }}
 
--- Source reference
 with source as (
     select
         supplier_id,
@@ -22,7 +21,6 @@ with source as (
 
 ),
 
--- Basic data cleaning and standardization
 renamed as (
 
     select
