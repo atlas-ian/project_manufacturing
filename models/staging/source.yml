@@ -6,8 +6,11 @@ sources:
       - name: raw_inventory
       - name: raw_product
       - name: raw_machine
+<<<<<<< HEAD
 
       - name: raw_product
+=======
+>>>>>>> 3ff62df43b9e41936b8e0314f42d81c4a36f83d8
       - name: raw_production_order
       - name: raw_shipment
       - name : raw_supplier

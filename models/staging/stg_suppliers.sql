@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 with suppliers as (
     select * from {{ source('src','raw_supplier')}}
 =======
@@ -40,4 +41,7 @@ renamed as (
 )
 
 select * from renamed
+=======
+select * from {{ source ('src', 'raw_supplier')}}
+>>>>>>> 3ff62df43b9e41936b8e0314f42d81c4a36f83d8
 
