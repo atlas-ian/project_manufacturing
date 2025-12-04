@@ -23,7 +23,6 @@ final_fact AS (
         -- Descriptive Attributes
         product_name,
         category,
-        subcategory,
         shipment_status,
 
         -- Measures

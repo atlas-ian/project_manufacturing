@@ -6,8 +6,7 @@ with products as (
     select
         cast(product_id as varchar) as product_id,
         product_name,
-        category,
-        category as subcategory
+        category
     from {{ source('src', 'raw_product') }}
 ),
 
@@ -38,7 +37,7 @@ joined_data as (
         s.product_id,
         p.product_name,
         p.category,
-        p.subcategory,
+
         s.quantity_shipped,
         s.ship_date,
         s.delivery_date,

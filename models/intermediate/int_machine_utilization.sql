@@ -34,7 +34,6 @@ joined_data as (
         orders.total_orders,
         orders.total_units_planned,
         machines.capacity_per_day,
-        -- Department mapping using macro
         {{ map_machine_department('machines.machine_type') }} as department
     from orders
     left join machines
@@ -45,7 +44,11 @@ metrics_calculation as (
     select
         *,
         24 as available_hours,
-        {{ production_hours('production_date', 'production_date') }} as total_production_hours  -- We'll override to 24 hours per day
+        -- Estimate production hours based on capacity
+        case 
+            when capacity_per_day > 0 then (total_units_planned / capacity_per_day) * 24
+            else 0
+        end as total_production_hours
     from joined_data
 ),
 
