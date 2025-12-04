@@ -4,8 +4,10 @@ WITH products AS (
         PRODUCT_NAME ,
         SUPPLIER_ID,
         CATEGORY,
-        SUBCATEGORY,
         UNIT_OF_MEASURE,
+        WEIGHT_KG
+        PRICE,
+       
         CREATED_TS
     FROM {{ source('src', 'raw_product') }}
 )
