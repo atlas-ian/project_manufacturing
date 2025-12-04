@@ -8,9 +8,10 @@ with base as (
     select
         supplier_id,
         supplier_name,
+        country,
         contact_name,
         phone,
-        country
+       
     from {{ source('src', 'raw_supplier') }}
 ),
 

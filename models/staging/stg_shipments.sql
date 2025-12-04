@@ -1,11 +1,13 @@
 WITH shippments AS (
     SELECT
         shipment_id,
-        customer_id,
         product_id,
-        quantity_shipped,
-        destination,
-        ship_date
+        warehouse_id,
+       quantity,
+        shipment_date
+        delivery_date,
+        status
+       
     FROM {{ source('src', 'raw_shipment') }}
 
 )
