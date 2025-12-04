@@ -1,89 +1,79 @@
-WITH machines AS (
-    SELECT
-        upper(trim(MACHINE_ID)) AS join_key,
-        MACHINE_ID AS machine_id,
-        MACHINE_TYPE AS machine_type,
-        CAPACITY_PER_DAY AS capacity_per_day,  -- ensure correct name
-        INSTALL_DATE AS install_date,
-        STATUS AS current_machine_status
-    FROM {{ source('src', 'raw_machine') }}
+{{ config(
+    materialized='table'
+) }}
+
+with machines as (
+    select
+        {{ clean_id('MACHINE_ID') }} as join_key,
+        MACHINE_ID as machine_id,
+        MACHINE_TYPE as machine_type,
+        CAPACITY_PER_DAY as capacity_per_day,
+        INSTALL_DATE as install_date,
+        STATUS as current_machine_status
+    from {{ source('src', 'raw_machine') }}
 ),
 
-orders AS (
-    SELECT
-        upper(trim(machine_id)) AS join_key,
-        machine_id AS raw_order_machine_id,
-        start_date AS production_date,
-        count(production_order_id) AS total_orders,
-        sum(planned_quantity) AS total_units_planned
-    FROM {{ source('src', 'raw_production_order') }}
-    GROUP BY 1,2,3
+orders as (
+    select
+        {{ clean_id('machine_id') }} as join_key,
+        machine_id as raw_order_machine_id,
+        start_date as production_date,
+        count(production_order_id) as total_orders,
+        sum(planned_quantity) as total_units_planned
+    from {{ source('src', 'raw_production_order') }}
+    group by 1,2,3
 ),
 
-joined_data AS (
-    SELECT
+joined_data as (
+    select
         orders.production_date,
-        coalesce(machines.machine_id, orders.raw_order_machine_id) AS machine_id,
+        coalesce(machines.machine_id, orders.raw_order_machine_id) as machine_id,
         machines.machine_type,
         machines.install_date,
-        machines.current_machine_status AS machine_status,
+        machines.current_machine_status as machine_status,
         orders.total_orders,
         orders.total_units_planned,
-        machines.capacity_per_day,  -- propagate column
-
-        -- Department Mapping
-        CASE 
-            WHEN machines.machine_type IN ('Drill', 'Lathe', 'Milling') THEN 'Standard Machining'
-            WHEN machines.machine_type = 'CNC' THEN 'Advanced Machining'
-            WHEN machines.machine_type = 'Laser Cutter' THEN 'Fabrication'
-            WHEN machines.machine_type = '3D Printer' THEN 'Additive Manufacturing'
-            ELSE 'Other'
-        END AS department
-
-    FROM orders
-    LEFT JOIN machines 
-        ON orders.join_key = machines.join_key
+        machines.capacity_per_day,
+        -- Department mapping using macro
+        {{ map_machine_department('machines.machine_type') }} as department
+    from orders
+    left join machines
+        on orders.join_key = machines.join_key
 ),
 
-metrics_calculation AS (
-    SELECT
+metrics_calculation as (
+    select
         *,
-        24 AS available_hours,
-        ROUND((total_units_planned / NULLIF(capacity_per_day, 0)) * 24, 2) AS total_production_hours
-    FROM joined_data
+        24 as available_hours,
+        {{ production_hours('production_date', 'production_date') }} as total_production_hours  -- We'll override to 24 hours per day
+    from joined_data
 ),
 
-final AS (
-    SELECT
+final as (
+    select
         machine_id,
         production_date,
         department,
         machine_type,
         machine_status,
         install_date,
-        coalesce(total_orders, 0) AS total_orders,
-        coalesce(total_units_planned, 0) AS total_units_planned,
-        capacity_per_day,  -- include for downstream dim table
+        coalesce(total_orders, 0) as total_orders,
+        coalesce(total_units_planned, 0) as total_units_planned,
+        capacity_per_day,
         total_production_hours,
         available_hours,
-        ROUND(GREATEST(0, available_hours - total_production_hours), 2) AS idle_hours,
-        ROUND((total_units_planned / NULLIF(capacity_per_day, 0)) * 100, 2) AS utilization_rate_pct,
-        ROUND(total_units_planned / NULLIF(total_production_hours, 0), 2) AS throughput_units_per_hour,
-        CASE
-            WHEN capacity_per_day IS NULL THEN 'Unknown Capacity'
-            WHEN (total_units_planned / NULLIF(capacity_per_day, 0)) > 1.0 THEN 'Overloaded'
-            WHEN (total_units_planned / NULLIF(capacity_per_day, 0)) >= 0.8 THEN 'Optimal'
-            WHEN (total_units_planned / NULLIF(capacity_per_day, 0)) >= 0.5 THEN 'Underutilized'
-            ELSE 'Idle/Low'
-        END AS utilization_status,
-        CASE 
-            WHEN install_date IS NULL THEN 'Unknown'
-            WHEN DATEDIFF('day', install_date, CURRENT_DATE()) <= 365 THEN 'Commissioned'
-            WHEN DATEDIFF('day', install_date, CURRENT_DATE()) <= 3 * 365 THEN 'Mid-Life'
-            WHEN DATEDIFF('day', install_date, CURRENT_DATE()) <= 6 * 365 THEN 'Aging'
-            ELSE 'End-of-Life'
-        END AS lifecycle_stage
-    FROM metrics_calculation
+        round(greatest(0, available_hours - total_production_hours), 2) as idle_hours,
+        {{ pct('total_units_planned', 'capacity_per_day') }} as utilization_rate_pct,
+        {{ throughput_units_per_hour('total_units_planned', 'total_production_hours') }} as throughput_units_per_hour,
+        {{ utilization_status('total_units_planned / nullif(capacity_per_day,0)') }} as utilization_status,
+        case
+            when install_date is null then 'Unknown'
+            when datediff('day', install_date, current_date()) <= 365 then 'Commissioned'
+            when datediff('day', install_date, current_date()) <= 3 * 365 then 'Mid-Life'
+            when datediff('day', install_date, current_date()) <= 6 * 365 then 'Aging'
+            else 'End-of-Life'
+        end as lifecycle_stage
+    from metrics_calculation
 )
 
-SELECT * FROM final
+select * from final
