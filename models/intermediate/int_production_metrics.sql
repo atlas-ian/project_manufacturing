@@ -7,7 +7,7 @@ with machines as (
         capacity_per_day,
         -- FIX: Added Machine Status from source
         status as machine_current_status
-    from {{ source('src', 'raw_machine') }}
+    from {{ ref('stg_machines') }}
 
 ),
 
@@ -22,7 +22,7 @@ orders as (
         end_date,
         -- FIX: Renamed for clarity vs machine status
         status as order_status
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref('stg_production_orders') }}
 
 ),
 

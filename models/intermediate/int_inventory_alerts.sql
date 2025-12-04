@@ -12,7 +12,7 @@ with products as (
         -- Handle potential null prices to avoid math errors later
         coalesce(price, 0) as unit_price_usd,
         weight_kg
-    from {{ source('src', 'raw_product') }}
+    from {{ ref('stg_products') }}
 
 ),
 
@@ -25,7 +25,7 @@ inventory as (
         -- Ensure we don't have null quantities
         coalesce(on_hand_qty, 0) as on_hand_qty,
         coalesce(on_order_qty, 0) as on_order_qty
-    from {{ source('src', 'raw_inventory') }}
+    from {{ ref('stg_inventory') }}
 
 ),
 

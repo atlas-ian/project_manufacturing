@@ -5,7 +5,7 @@ WITH products AS (
         SUPPLIER_ID,
         CATEGORY,
         UNIT_OF_MEASURE,
-        WEIGHT_KG
+        WEIGHT_KG,
         PRICE,
        
         CREATED_TS
