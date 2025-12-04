@@ -12,7 +12,7 @@ with products as (
         category,
         coalesce(price, 0) as unit_price_usd,
         weight_kg
-    from {{ source('src', 'raw_product') }}
+    from {{ ref('stg_products') }}
 
 ),
 
@@ -24,7 +24,7 @@ inventory as (
         snapshot_date,
         coalesce(on_hand_qty, 0) as on_hand_qty,
         coalesce(on_order_qty, 0) as on_order_qty
-    from {{ source('src', 'raw_inventory') }}
+    from {{ ref( 'stg_inventory') }}
 
 ),
 

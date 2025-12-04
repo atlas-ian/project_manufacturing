@@ -7,7 +7,7 @@ with products as (
         cast(product_id as varchar) as product_id,
         product_name,
         category
-    from {{ source('src', 'raw_product') }}
+    from {{ ref('stg_products') }}
 ),
 
 production_agg as (
@@ -15,7 +15,7 @@ production_agg as (
         cast(product_id as varchar) as product_id,
         sum(planned_quantity) as total_planned_quantity,
         max(end_date) as latest_end_date
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref( 'stg_production_orders') }}
     group by 1
 ),
 
@@ -28,7 +28,7 @@ shipments as (
         shipment_date as ship_date,
         delivery_date,
         status as shipment_status
-    from {{ source('src', 'raw_shipment') }}
+    from {{ ref('stg_shipments') }}
 ),
 
 joined_data as (
