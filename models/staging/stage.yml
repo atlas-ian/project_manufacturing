@@ -1,7 +1,69 @@
+version: 2
+
 models:
+  # ============================
+  # stg_inventory
+  # ============================
   - name: stg_inventory
+    description: "Staging table for inventory snapshots"
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+      - name: warehouse_id
+        tests:
+          - not_null
+      - name: snapshot_date
+        tests:
+          - not_null
+      - name: on_hand_qty
+        tests:
+          - not_null
+      - name: on_order_qty
+        tests:
+          - not_null
+
+  # ============================
+  # stg_products
+  # ============================
   - name: stg_products
+    description: "Staging table for products"
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: category
+        tests:
+          - not_null
+
+  # ============================
+  # stg_purchase_orders
+  # ============================
   - name: stg_purchase_orders
+    description: "Staging table for purchase orders"
+    columns:
+      - name: purchase_order_id
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        tests:
+          - not_null
+      - name: supplier_id
+        tests:
+          - not_null
+      - name: order_date
+        tests:
+          - not_null
+      # add more fields here if you want not_null tests (e.g. order_quantity, status)
+
+  # ============================
+  # stg_production_orders
+  # ============================
   - name: stg_production_orders
     description: "Staging table for production orders"
     columns:
@@ -12,19 +74,40 @@ models:
       - name: product_id
         tests:
           - not_null
+      - name: machine_id
+        tests:
+          - not_null
+      - name: start_date
+        tests:
+          - not_null
+      - name: end_date
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
       - name: shift_id
-  # models/staging/stg_machine.yml
+        # no tests added (optional field) – keep as-is unless you want not_null
 
+  # ============================
+  # stg_machines
+  # ============================
   - name: stg_machines
     description: "Staging table for machines"
     columns:
       - name: machine_id
         tests:
           - not_null
-     
+          - unique
+      - name: machine_type
+        tests:
+          - not_null
       - name: install_date
         tests:
           - not_null
       - name: status
+        tests:
+          - not_null
+      - name: capacity_per_day
         tests:
           - not_null
