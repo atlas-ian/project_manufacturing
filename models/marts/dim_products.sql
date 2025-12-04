@@ -4,32 +4,34 @@
 ) }}
 
 WITH source_data AS (
-    -- Reference your raw data or staging model here
-    SELECT 
-        PRODUCT_NAME, 
-        CATEGORY
-    from {{ source('src', 'raw_product') }}
+    -- Pull distinct product-level fields from intermediate model (NO raw refs)
+    SELECT DISTINCT
+        product_name,
+        category,
+        product_id
+    FROM {{ ref('int_shipment_metrics') }}
 ),
 
 parsed_logic AS (
     SELECT
-        PRODUCT_NAME AS original_label,
-        CATEGORY AS category_name,
-        
-        -- 1. Extract the Text Name (Everything before the last space)
-        -- Logic: Trims whitespace, assumes format "Name ID"
-        TRIM(REGEXP_SUBSTR(PRODUCT_NAME, '^[a-zA-Z ]+')) AS product_name_clean,
+        product_name AS original_label,
+        category AS category_name,
 
-        -- 2. Extract the Source ID (The numbers at the end)
-        -- Logic: Casts the extracted regex number to Integer
-        CAST(REGEXP_SUBSTR(PRODUCT_NAME, '[0-9]+$') AS INT) AS source_product_id
+        -- Extract text product name (everything before last number group)
+        TRIM(REGEXP_SUBSTR(product_name, '^[a-zA-Z ]+')) AS product_name_clean,
+
+        -- Extract product id number from product_name OR default to product_id
+        COALESCE(
+            CAST(REGEXP_SUBSTR(product_name, '[0-9]+$') AS INT),
+            CAST(product_id AS INT)
+        ) AS source_product_id
+
     FROM source_data
 ),
 
 sku_generation AS (
     SELECT
         *,
-        -- 3. Create a short code for the Category
         CASE category_name
             WHEN 'Appliances'   THEN 'APP'
             WHEN 'Textiles'     THEN 'TEX'
@@ -37,26 +39,28 @@ sku_generation AS (
             WHEN 'Electronics'  THEN 'ELE'
             WHEN 'Automobile'   THEN 'AUT'
             WHEN 'Toys'         THEN 'TOY'
-            ELSE 'UNK' 
+            ELSE 'UNK'
         END AS category_code
     FROM parsed_logic
 ),
 
 final_dimension AS (
     SELECT
-        -- 4. Create the Surrogate Key (Primary Key)
-        -- Using MD5 hash ensures the same ID is generated every run for the same product
+        -- Surrogate Key
         MD5(original_label || category_name) AS product_key,
 
-        -- 5. Create the Human-Readable SKU (e.g., TEX-0022)
-        -- LPAD ensures '22' becomes '0022' for sorting alignment
+        -- Human readable SKU
         category_code || '-' || LPAD(CAST(source_product_id AS VARCHAR), 4, '0') AS product_sku,
 
-        -- Clean Columns
+        -- Clean attributes
         product_name_clean AS product_name,
         category_name AS product_category,
         source_product_id,
-        original_label AS product_label_search
+        original_label AS product_label_search,
+
+        -- New meaningful columns
+        LENGTH(original_label) AS product_label_length,          -- text length for QA or analysis
+        CASE WHEN category_name = 'Electronics' THEN TRUE ELSE FALSE END AS is_electronic  -- useful boolean flag
 
     FROM sku_generation
 )

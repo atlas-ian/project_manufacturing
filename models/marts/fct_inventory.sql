@@ -1,5 +1,5 @@
 {{ config(
-    materialized='incremental',
+    materialized='table',
     unique_key='INVENTORY_SK'
 ) }}
 
@@ -11,7 +11,7 @@ WITH source_data AS (
         ON_HAND_QTY,
         ON_ORDER_QTY,
         SNAPSHOT_DATE
-    FROM {{ source('src', 'raw_inventory') }}
+    FROM {{ ref('stg_inventory') }}
 ),
 
 logic_layer AS (
@@ -25,9 +25,7 @@ logic_layer AS (
         -- High Value Metric (Pipeline)
         (s.ON_HAND_QTY + s.ON_ORDER_QTY) AS TOTAL_PIPELINE_QTY,
 
-        -- THE FIX: LOOKUP STRATEGY
-        -- Since we can't recreate the MD5(Name+Category) key here (we don't have Name/Cat),
-        -- we MUST join to the dimension to retrieve the key.
+        -- Lookup Surrogate Key from Product Dimension
         COALESCE(p.product_key, '-1') AS PRODUCT_SK
 
     FROM source_data s
@@ -42,10 +40,7 @@ final_fact AS (
         ABS(HASH(INVENTORY_ID || TO_CHAR(SNAPSHOT_DATE, 'YYYYMMDD'))) AS INVENTORY_SK,
 
         -- 2. Foreign Keys
-        -- PRODUCT_SK is now a VARCHAR (String) because it comes from your MD5 Dimension.
-        -- DO NOT CAST TO NUMBER.
         PRODUCT_SK, 
-        
         ABS(HASH(CAST(WAREHOUSE_ID AS INT))) AS WAREHOUSE_SK,
         TO_NUMBER(TO_CHAR(SNAPSHOT_DATE, 'YYYYMMDD')) AS SNAPSHOT_DATE_SK,
 

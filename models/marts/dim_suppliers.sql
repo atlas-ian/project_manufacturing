@@ -4,7 +4,7 @@
 ) }}
 
 WITH source_data AS (
-    SELECT * FROM {{ source('src', 'raw_supplier') }}
+    SELECT * FROM {{ ref('stg_suppliers') }}
 ),
 
 stage_formatting AS (
