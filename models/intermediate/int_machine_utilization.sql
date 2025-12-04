@@ -10,7 +10,7 @@ with machines as (
         CAPACITY_PER_DAY as capacity_per_day,
         INSTALL_DATE as install_date,
         STATUS as current_machine_status
-    from {{ source('src', 'raw_machine') }}
+    from {{ ref('stg_machines') }}
 ),
 
 orders as (
@@ -20,7 +20,7 @@ orders as (
         start_date as production_date,
         count(production_order_id) as total_orders,
         sum(planned_quantity) as total_units_planned
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref('stg_production_orders') }}
     group by 1,2,3
 ),
 

@@ -9,7 +9,7 @@ with machines as (
         machine_type,
         capacity_per_day,
         status as machine_current_status
-    from {{ source('src', 'raw_machine') }}
+    from {{ ref('stg_machines') }}
 ),
 
 orders as (
@@ -21,7 +21,7 @@ orders as (
         start_date,
         end_date,
         status as order_status
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref('stg_production_orders') }}
 ),
 
 joined_data as (
