@@ -3,8 +3,8 @@ WITH shippments AS (
         shipment_id,
         product_id,
         warehouse_id,
-       quantity,
-        shipment_date
+        quantity,
+        shipment_date,
         delivery_date,
         status
        

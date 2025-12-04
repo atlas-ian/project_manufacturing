@@ -1,74 +1,58 @@
+{{ config(materialized='table') }}
 
 with machines as (
 
     select
-        -- Best Practice: Clean join keys to avoid silent failures
-        upper(trim(machine_id)) as join_key,
+        {{ clean_id('machine_id') }} as join_key,
         machine_id,
         machine_type,
         capacity_per_day,
         status as current_machine_status
-    from {{ source('src', 'raw_machine') }}
+    from {{ ref('stg_machines') }}
 
 ),
 
 orders as (
 
     select
-        upper(trim(machine_id)) as join_key,
+        {{ clean_id('machine_id') }} as join_key,
         machine_id as raw_order_machine_id,
-        
-        -- DDL defines this as DATE, so we use it directly
         start_date as production_date,
-        
         count(production_order_id) as total_orders,
-        
-        -- Matching your DDL column name
         sum(planned_quantity) as total_units_planned
-
-    from {{ source('src', 'raw_production_order') }}
-    group by 1, 2, 3
+    from {{ ref('stg_production_orders') }}
+    group by 1,2,3
 
 ),
 
 joined_data as (
 
     select
-        orders.production_date,
-        -- If machine table is missing the ID, preserve the ID from the order
-        coalesce(machines.machine_id, orders.raw_order_machine_id) as machine_id,
-        machines.machine_type,
-        machines.current_machine_status as machine_status,
-        orders.total_orders,
-        orders.total_units_planned,
-        machines.capacity_per_day,
-        
-        -- Department Mapping
-        case 
-            when machines.machine_type in ('Drill', 'Lathe', 'Milling') then 'Standard Machining'
-            when machines.machine_type in ('CNC') then 'Advanced Machining'
-            when machines.machine_type = 'Laser Cutter' then 'Fabrication'
-            when machines.machine_type = '3D Printer' then 'Additive Manufacturing'
-            else 'Other'
-        end as department
-
-    from orders
-    left join machines 
-        on orders.join_key = machines.join_key
+        o.production_date,
+        coalesce(m.machine_id, o.raw_order_machine_id) as machine_id,
+        m.machine_type,
+        m.current_machine_status as machine_status,
+        o.total_orders,
+        o.total_units_planned,
+        m.capacity_per_day,
+        {{ map_machine_department('m.machine_type') }} as department
+    from orders o
+    left join machines m
+        on o.join_key = m.join_key
 
 ),
 
-metrics_calculation as (
+metrics as (
 
     select
         *,
         24 as available_hours,
 
-        -- Calculate Production Hours
-        -- Formula: (Total Units / Daily Capacity) * 24
+        -- KEY FIX: do the * 24 inside SQL, not in Jinja
         round(
-            (total_units_planned / nullif(capacity_per_day, 0)) * 24, 
-        2) as total_production_hours
+            {{ utilization_ratio('total_units_planned', 'capacity_per_day') }} * 24,
+            2
+        ) as total_production_hours
 
     from joined_data
 
@@ -84,34 +68,24 @@ final as (
         machine_status,
         coalesce(total_orders, 0) as total_orders,
         coalesce(total_units_planned, 0) as total_units_planned,
-        
-        -- Time Metrics
+
         total_production_hours,
         available_hours,
-        round(greatest(0, available_hours - total_production_hours), 2) as idle_hours,
 
-        -- Utilization Rate %
-        round(
-            (total_units_planned / nullif(capacity_per_day, 0)) * 100, 
-        2) as utilization_rate_pct,
+        {{ safe_round(
+            'greatest(0, available_hours - total_production_hours)',
+            2
+        ) }} as idle_hours,
 
-        -- Throughput
-        round(
-            total_units_planned / nullif(total_production_hours, 0), 
-        2) as throughput_units_per_hour,
+        {{ pct('total_units_planned', 'capacity_per_day') }} as utilization_rate_pct,
 
-        -- Status Logic
-        case
-            when capacity_per_day is null then 'Unknown Capacity'
-            when (total_units_planned / nullif(capacity_per_day, 0)) > 1.0 then 'Overloaded'
-            when (total_units_planned / nullif(capacity_per_day, 0)) >= 0.8 then 'Optimal'
-            when (total_units_planned / nullif(capacity_per_day, 0)) >= 0.5 then 'Underutilized'
-            else 'Idle/Low'
-        end as utilization_status
+        {{ throughput_units_per_hour('total_units_planned', 'total_production_hours') }} as throughput_units_per_hour,
 
-    from metrics_calculation
+        {{ utilization_status(
+            utilization_ratio('total_units_planned', 'capacity_per_day')
+        ) }} as utilization_status
 
+    from metrics
 )
 
 select * from final
-

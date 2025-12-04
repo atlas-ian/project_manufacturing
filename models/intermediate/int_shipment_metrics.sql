@@ -1,11 +1,13 @@
+{{ config(materialized='table') }}
+
 with products as (
 
     select
         cast(product_id as varchar) as product_id,
         product_name,
         category,
-        category as subcategory 
-    from {{ source('src', 'raw_product') }}
+        category as subcategory
+    from {{ ref('stg_products') }}
 
 ),
 
@@ -15,7 +17,7 @@ production_agg as (
         cast(product_id as varchar) as product_id,
         sum(planned_quantity) as total_planned_quantity,
         max(end_date) as latest_end_date
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref('stg_production_orders') }}
     group by 1
 
 ),
@@ -28,35 +30,31 @@ shipments as (
         cast(warehouse_id as varchar) as warehouse_id,
         quantity as quantity_shipped,
         shipment_date as ship_date,
-        -- Check if delivery_date exists in raw data
-        delivery_date, 
+        delivery_date,
         status as shipment_status
-
-    from {{ source('src', 'raw_shipment') }}
+    from {{ ref('stg_shipments') }}
 
 ),
 
 joined_data as (
 
     select
-        shipments.shipment_id,
-        shipments.product_id,
-        products.product_name,
-        products.category,
-        products.subcategory,
-        shipments.quantity_shipped,
-        shipments.ship_date,
-        shipments.delivery_date,
-        shipments.shipment_status,
-        
-        coalesce(production_agg.total_planned_quantity, 0) as total_planned_quantity,
-        production_agg.latest_end_date
-
-    from shipments
-    left join products 
-        on shipments.product_id = products.product_id
-    left join production_agg
-        on shipments.product_id = production_agg.product_id
+        s.shipment_id,
+        s.product_id,
+        p.product_name,
+        p.category,
+        p.subcategory,
+        s.quantity_shipped,
+        s.ship_date,
+        s.delivery_date,
+        s.shipment_status,
+        coalesce(pa.total_planned_quantity, 0) as total_planned_quantity,
+        pa.latest_end_date
+    from shipments s
+    left join products p
+        on s.product_id = p.product_id
+    left join production_agg pa
+        on s.product_id = pa.product_id
 
 ),
 
@@ -64,27 +62,11 @@ metrics as (
 
     select
         *,
-        
-        -- Fulfillment Rate
-        round(
-            (quantity_shipped / nullif(total_planned_quantity, 0)) * 100,
-        2) as fulfillment_rate_pct,
-
+        {{ fulfillment_rate_pct('quantity_shipped', 'total_planned_quantity') }} as fulfillment_rate_pct,
         latest_end_date as planned_completion_date,
-
-        -- 1. Transit Time: How long did it take to get to the customer? (Real metric)
-        datediff(day, ship_date, delivery_date) as transit_days,
-
-        -- 2. Delay Days: Cap at 0. If negative, it implies 0 delay (Shipped from stock)
-        greatest(0, datediff(day, latest_end_date, ship_date)) as delay_days,
-
-        -- 3. Timing Status: Explains the context
-        case 
-            when ship_date < latest_end_date then 'Shipped from Inventory'
-            when ship_date > latest_end_date then 'Production Lag'
-            else 'Just-in-Time'
-        end as shipment_timing_status
-
+        {{ transit_days('ship_date', 'delivery_date') }} as transit_days,
+        {{ delay_days('latest_end_date', 'ship_date') }} as delay_days,
+        {{ shipment_timing_status('ship_date', 'latest_end_date') }} as shipment_timing_status
     from joined_data
 
 )

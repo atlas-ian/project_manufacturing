@@ -47,3 +47,9 @@ models:
       +schema: intermediate    # All intermediate models go into SCHEMA INTERMEDIATE
       +tags: ['intermediate']
       +on_schema_change: sync_all_columns
+      
+snapshots:
+  Analytics:
+    +target_schema: manufacturing360_scd   # or whatever schema you want
+
+
