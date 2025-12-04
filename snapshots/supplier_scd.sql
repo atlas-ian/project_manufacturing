@@ -18,4 +18,8 @@ select
   country
 from {{ ref('stg_suppliers') }}
 
+<<<<<<< HEAD
 {% endsnapshot %}
+=======
+{% endsnapshot %}
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc

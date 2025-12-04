@@ -110,4 +110,8 @@ models:
           - not_null
       - name: capacity_per_day
         tests:
+<<<<<<< HEAD
           - not_null
+=======
+          - not_null
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc

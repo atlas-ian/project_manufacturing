@@ -1,8 +1,11 @@
+<<<<<<< HEAD
 --hello
 
 -- macros/manufacturing_metrics.sql
 
 
+=======
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
 
 {% macro clean_id(column_name) %}
     upper(trim({{ column_name }}))
@@ -120,4 +123,8 @@
         when {{ on_hand_expr }} > 800 then 'Stop Ordering / Promo'
         else 'No Action'
     end
+<<<<<<< HEAD
 {% endmacro %}
+=======
+{% endmacro %}
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc

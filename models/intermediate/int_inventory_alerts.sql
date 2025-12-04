@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 {{ config(materialized='table') }}
+=======
+{{ config(
+    materialized='table'
+) }}
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
 
 with products as (
 
@@ -29,6 +35,7 @@ inventory as (
 joined_data as (
 
     select
+<<<<<<< HEAD
         i.snapshot_date,
         i.warehouse_id,
         p.product_id,
@@ -43,6 +50,23 @@ joined_data as (
     from inventory i
     inner join products p
         on i.product_id = p.product_id
+=======
+        inventory.snapshot_date,
+        inventory.warehouse_id,
+        products.product_id,
+        products.product_name,
+        products.supplier_id,
+        products.unit_of_measure,
+        products.category,
+        inventory.on_hand_qty,
+        inventory.on_order_qty,
+        products.unit_price_usd,
+        products.weight_kg
+
+    from inventory
+    inner join products 
+        on inventory.product_id = products.product_id
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
 
 ),
 
@@ -50,9 +74,23 @@ metrics as (
 
     select
         *,
+<<<<<<< HEAD
         (on_hand_qty + on_order_qty) as total_supply_qty,
         round(on_hand_qty * unit_price_usd, 2) as inventory_value_usd,
         round(on_hand_qty * weight_kg, 2) as total_weight_on_hand_kg
+=======
+        -- Total units available or incoming
+        (on_hand_qty + on_order_qty) as total_supply_qty,
+        -- Financial Value of current physical stock
+        round(on_hand_qty * unit_price_usd, 2) as inventory_value_usd,
+        -- Logistics: Total weight (useful for shipping estimates)
+        round(on_hand_qty * weight_kg, 2) as total_weight_on_hand_kg,
+        -- Inventory status using macro
+        {{ inventory_status('on_hand_qty') }} as inventory_status,
+        -- Recommended action using macro
+        {{ inventory_recommended_action('on_hand_qty', 'on_order_qty') }} as recommended_action
+
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
     from joined_data
 
 ),
@@ -72,8 +110,14 @@ final as (
         total_supply_qty,
         inventory_value_usd,
         total_weight_on_hand_kg,
+<<<<<<< HEAD
         {{ inventory_status('on_hand_qty') }} as inventory_status,
         {{ inventory_recommended_action('on_hand_qty', 'on_order_qty') }} as recommended_action
+=======
+        inventory_status,
+        recommended_action
+
+>>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
     from metrics
 
 )
