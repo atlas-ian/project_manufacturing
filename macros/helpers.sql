@@ -116,3 +116,27 @@
         else 'No Action'
     end
 {% endmacro %}
+
+
+-- {% macro run_all_helpers() %}
+--     {{ clean_id(column_name) }}
+--     {{ map_machine_department(machine_type_expr) }}
+--     {{ safe_divide(numerator, denominator) }}
+--     {{ pct(numerator, denominator)}}
+--     {{ safe_round(expr, scale=2)}}
+--     {{ utilization_ratio(total_units_expr, capacity_per_day_expr)}}
+--     {{utilization_status(load_ratio_expr)}}
+--      {{throughput_units_per_hour(units_expr, hours_expr)}}
+--     {{duration_days(start_date_expr, end_date_expr) }}
+--     {{production_hours(start_date_expr, end_date_expr)}}
+--     {{efficiency_score_pct(planned_qty_expr, capacity_per_day_expr, duration_days_expr)}}
+--     {{efficiency_status(efficiency_pct_expr)}}
+--     {{fulfillment_rate_pct(qty_shipped_expr, total_planned_expr)}}
+--     {{transit_days(ship_date_expr, delivery_date_expr)}}
+--     {{delay_days(planned_completion_expr, ship_date_expr)}}
+--     {{ shipment_timing_status(ship_date_expr, planned_completion_expr)}}
+--     {{inventory_status(on_hand_expr) }}
+--     {{inventory_recommended_action(on_hand_expr, on_order_expr)}}
+
+
+-- {% endmacro %}
