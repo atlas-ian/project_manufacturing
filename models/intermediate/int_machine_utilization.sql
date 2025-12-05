@@ -20,7 +20,7 @@ orders as (
         start_date as production_date,
         count(production_order_id) as total_orders,
         sum(planned_quantity) as total_units_planned
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref( 'stg_production_orders') }}
     group by 1,2,3
 ),
 

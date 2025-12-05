@@ -4,7 +4,7 @@ WITH shippments AS (
         product_id,
         warehouse_id,
        quantity,
-        shipment_date
+        shipment_date,
         delivery_date,
         status
        
