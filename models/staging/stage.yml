@@ -10,6 +10,10 @@ models:
       - name: product_id
         tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
       - name: warehouse_id
         tests:
           - not_null
@@ -53,13 +57,20 @@ models:
       - name: product_id
         tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
       - name: supplier_id
         tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_suppliers')
+                field: supplier_id
       - name: order_date
         tests:
           - not_null
-      # add more fields here if you want not_null tests (e.g. order_quantity, status)
 
   # ============================
   # stg_production_orders
@@ -74,9 +85,17 @@ models:
       - name: product_id
         tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
       - name: machine_id
         tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_machines')
+                field: machine_id
       - name: start_date
         tests:
           - not_null
@@ -87,7 +106,7 @@ models:
         tests:
           - not_null
       - name: shift_id
-        # no tests added (optional field) – keep as-is unless you want not_null
+        # Optional FK – no test included
 
   # ============================
   # stg_machines

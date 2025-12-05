@@ -7,7 +7,6 @@ WITH products AS (
         UNIT_OF_MEASURE,
         WEIGHT_KG,
         PRICE,
-       
         CREATED_TS
     FROM {{ source('src', 'raw_product') }}
 )

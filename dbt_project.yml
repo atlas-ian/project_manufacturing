@@ -1,4 +1,3 @@
-
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models from the current file
@@ -18,8 +17,6 @@ test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
-
-target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
@@ -42,8 +39,10 @@ models:
       +materialized: view
       +tags: ['staging']
       +schema: staging
-    intermediate: 
+    intermediate:
       +materialized: incremental
       +schema: intermediate    # All intermediate models go into SCHEMA INTERMEDIATE
       +tags: ['intermediate']
       +on_schema_change: sync_all_columns
+flags:
+  require_generic_test_arguments_property: true

@@ -26,7 +26,7 @@ filtered as (
     {% endif %}
 
 ),
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 renamed as (
     select
         supplier_id,
