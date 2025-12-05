@@ -75,7 +75,7 @@ orders as (
         start_date as production_date,
         count(production_order_id) as total_orders,
         sum(planned_quantity) as total_units_planned
-    from {{ source('src', 'raw_production_order') }}
+    from {{ ref( 'stg_production_orders') }}
     group by 1,2,3
 ),
 
@@ -131,7 +131,6 @@ metrics_calculation AS (
 >>>>>>> 5a283c115a78f476192decb4c80fce057f5a28cc
 =======
         machines.capacity_per_day,
-        -- Department mapping using macro
         {{ map_machine_department('machines.machine_type') }} as department
     from orders
     left join machines
@@ -142,7 +141,11 @@ metrics_calculation as (
     select
         *,
         24 as available_hours,
-        {{ production_hours('production_date', 'production_date') }} as total_production_hours  -- We'll override to 24 hours per day
+        -- Estimate production hours based on capacity
+        case 
+            when capacity_per_day > 0 then (total_units_planned / capacity_per_day) * 24
+            else 0
+        end as total_production_hours
     from joined_data
 >>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
 ),

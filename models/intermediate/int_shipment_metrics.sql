@@ -12,6 +12,7 @@ with products as (
     select
         cast(product_id as varchar) as product_id,
         product_name,
+<<<<<<< HEAD
         category,
         category as subcategory
 <<<<<<< HEAD
@@ -20,6 +21,10 @@ with products as (
 =======
     from {{ source('src', 'raw_product') }}
 >>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
+=======
+        category
+    from {{ ref('stg_products') }}
+>>>>>>> b89e903ef0d8d91c830075cc3fc503d9dc8ee599
 ),
 
 production_agg as (
@@ -27,7 +32,11 @@ production_agg as (
         cast(product_id as varchar) as product_id,
         sum(planned_quantity) as total_planned_quantity,
         max(end_date) as latest_end_date
+<<<<<<< HEAD
     from {{ ref('stg_production_orders') }}
+=======
+    from {{ ref( 'stg_production_orders') }}
+>>>>>>> b89e903ef0d8d91c830075cc3fc503d9dc8ee599
     group by 1
 ),
 
@@ -41,11 +50,15 @@ shipments as (
         delivery_date,
         status as shipment_status
 <<<<<<< HEAD
+<<<<<<< HEAD
     from {{ ref('stg_shipments') }}
 
 =======
     from {{ source('src', 'raw_shipment') }}
 >>>>>>> e1b149b868a525c032773b0166018e564b2fbedc
+=======
+    from {{ ref('stg_shipments') }}
+>>>>>>> b89e903ef0d8d91c830075cc3fc503d9dc8ee599
 ),
 
 joined_data as (
@@ -54,7 +67,7 @@ joined_data as (
         s.product_id,
         p.product_name,
         p.category,
-        p.subcategory,
+
         s.quantity_shipped,
         s.ship_date,
         s.delivery_date,

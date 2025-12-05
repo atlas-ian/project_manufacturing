@@ -28,7 +28,11 @@ inventory as (
         snapshot_date,
         coalesce(on_hand_qty, 0) as on_hand_qty,
         coalesce(on_order_qty, 0) as on_order_qty
+<<<<<<< HEAD
     from {{ ref('stg_inventory') }}
+=======
+    from {{ ref( 'stg_inventory') }}
+>>>>>>> b89e903ef0d8d91c830075cc3fc503d9dc8ee599
 
 ),
 
